@@ -1,0 +1,53 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract AdvancedSmartContract {
+    address private owner;
+    uint256 private data;
+    bool private paused;
+
+    event DataUpdated(uint256 newData);
+    event ContractPaused(bool isPaused);
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the contract owner can call this function");
+        _;
+    }
+
+    modifier notPaused() {
+        require(!paused, "Contract is paused");
+        _;
+    }
+
+    constructor(uint256 initialData) {
+        owner = msg.sender;
+        data = initialData;
+        paused = false;
+    }
+
+    function updateData(uint256 newData) external onlyOwner notPaused {
+        require(newData != data, "New data must be different from current data");
+        data = newData;
+        emit DataUpdated(newData);
+    }
+
+    function getData() external view returns (uint256) {
+        return data;
+    }
+
+    function pauseContract() external onlyOwner {
+        require(!paused, "Contract is already paused");
+        paused = true;
+        emit ContractPaused(true);
+    }
+
+    function resumeContract() external onlyOwner {
+        require(paused, "Contract is not paused");
+        paused = false;
+        emit ContractPaused(false);
+    }
+
+    function isPaused() external view returns (bool) {
+        return paused;
+    }
+}
