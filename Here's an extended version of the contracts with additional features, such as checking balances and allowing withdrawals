@@ -1,0 +1,49 @@
+# ContractA.starknet
+
+balances_a: map(uint256, uint256)
+
+@public
+@payable
+def deposit():
+    balances_a[msg.sender] += msg.value
+    # Handle deposit logic
+    pass
+
+@public
+def getBalanceA(user: uint256) -> uint256:
+    return balances_a[user]
+
+@public
+def sendToB(message: int, amount: uint256):
+    require(balances_a[msg.sender] >= amount, "Insufficient balance")
+    balances_a[msg.sender] -= amount
+    # Call ContractB's receiveMessage method to send a message
+    invoke_contract("0xContractBAddress", "receiveMessage(uint256,uint256)", message, amount)
+
+# ContractB.starknet
+
+balances_b: map(uint256, uint256)
+
+@public
+@payable
+def deposit():
+    balances_b[msg.sender] += msg.value
+    # Handle deposit logic
+    pass
+
+@public
+def getBalanceB(user: uint256) -> uint256:
+    return balances_b[user]
+
+@public
+def receiveMessage(message: int, amount: uint256):
+    balances_b[msg.sender] += amount
+    # Handle receiving message logic
+    pass
+
+@public
+def sendToA(message: int, amount: uint256):
+    require(balances_b[msg.sender] >= amount, "Insufficient balance")
+    balances_b[msg.sender] -= amount
+    # Call ContractA's receiveMessage method to send a message
+    invoke_contract("0xContractAAddress", "receiveMessage(uint256,uint256)", message, amount)
